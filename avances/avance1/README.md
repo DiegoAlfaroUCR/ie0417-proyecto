@@ -156,7 +156,7 @@ graph TD
 - Administra el sitio web oficial de la EIE, gestionando el contenido institucional, noticias y enlaces, controlando accesos y permisos de edición, e integrando otros módulos del sistema.
 
 ### `eieinfo/`
-- Es donde se controlan los parámetros globales, las integraciones externas y la configuración de autenticación, rutas y roles
+- Es donde se controlan los parámetros globales, las integraciones externas y la configuración de autenticación, rutas y roles.
 
 ### `scripts/`
 - Almacena scripts utilitarios para tareas recurrentes, automatizando procesos administrativos o técnicos y facilitando el mantenimiento, respaldo y limpieza de datos.
