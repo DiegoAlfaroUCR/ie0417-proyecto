@@ -160,3 +160,192 @@ graph TD
 
 ### `scripts/`
 - Almacena scripts utilitarios para tareas recurrentes, automatizando procesos administrativos o técnicos y facilitando el mantenimiento, respaldo y limpieza de datos.
+
+## Dependencias externas y configuración del entorno
+
+El sistema EIEInfo depende de una serie de bibliotecas, herramientas y servicios externos necesarios para su correcta ejecución tanto en desarrollo como en producción.
+
+### 📦 Dependencias de Python (`requirements.txt`)
+
+Las dependencias del sistema están gestionadas con un archivo `requirements.txt`, que agrupa bibliotecas según su función principal:
+
+- **Framework web:**  
+  - `Django`: base para construir la aplicación web, manejo de modelos, vistas y rutas.  
+  - `django-extensions`: herramientas adicionales para desarrollo, como comandos de consola y modelos extendidos.  
+  - `django-polymorphic`: para manejar modelos con herencia y tipos variados.  
+  - `django-crontab`: permite configurar tareas programadas tipo cron dentro de Django.
+
+- **Interfaces de usuario:**  
+  - `django-widget-tweaks`: facilita la personalización de formularios HTML en plantillas.  
+  - `django-select2`: mejora los selectores desplegables con búsqueda y mejor interfaz.  
+  - `django-ckeditor` y `martor`: editores de texto enriquecido, para crear contenido con formato HTML o Markdown.
+
+- **Seguridad y validación:**  
+  - `django-recaptcha`: protección contra bots y spam mediante CAPTCHA de Google.  
+  - `django-letsencrypt`: automatiza la gestión y renovación de certificados SSL para HTTPS.
+
+- **Documentación:**  
+  - `docutils`: para procesar documentos en formatos reStructuredText.  
+  - `pypandoc`: convierte documentos entre distintos formatos (por ejemplo, Markdown a HTML).
+
+- **Análisis de código:**  
+  - `flake8`, `pycodestyle`, `pyflakes`: herramientas para verificar estilo y calidad del código Python, ayudando a mantener buenas prácticas.
+
+- **APIs y conectores:**  
+  - `google-api-python-client` y `oauth2client`: facilitan la integración con APIs de Google, como Calendar y Drive.  
+  - `facebook-sdk`: para interactuar con la API de Facebook y automatizar publicaciones.  
+  - `mysqlclient`: cliente para conectar Django con bases de datos MySQL/MariaDB.
+
+- **Procesamiento de archivos:**  
+  - `Pillow`: manipulación y procesamiento de imágenes.  
+  - `openpyxl`, `pyexcel-xls`, `XlsxWriter`: lectura y escritura de archivos Excel.  
+  - `PyPDF2`: manipulación de documentos PDF.  
+  - `vobject`: manejo de archivos vCard y iCalendar.
+
+- **Otros:**  
+  - `sorl-thumbnail`: generación y manejo de miniaturas de imágenes para optimizar carga.  
+  - `scholarly`: parseador de Google Scholar para búsquedas académicas.  
+  - `django-wiki`: módulo para crear wikis integrados en la aplicación.
+
+> 📁 El archivo `requirements.txt` debe instalarse usando:  
+> ```bash
+> pip install -r requirements.txt
+> ```
+
+
+### 🛠️ Paquetes del sistema (`setup.sh`)
+
+El script `setup.sh` automatiza la instalación de dependencias del sistema operativo necesarias para compilar librerías de Python y manejar servicios externos como MySQL y Nginx.
+
+Incluye paquetes como:
+
+- **Python 3 y herramientas de desarrollo:**  
+  `python3-dev`, `pip` — necesarios para compilar extensiones y gestionar paquetes Python.
+
+- **Servidor de base de datos:**  
+  `mysql-server`, `python3-mysqldb` — para la instalación y conexión con MySQL/MariaDB.
+
+- **Servidor web:**  
+  `nginx`, `nginx-full`, `nginx-extras`, `certbot` — servidor web, módulos extras y gestión automática de certificados SSL.
+
+- **Soporte para imágenes y documentos:**  
+  `libjpeg`, `libpng` — librerías para procesamiento de imágenes.  
+  `pandoc`, `texlive-full` — herramientas para conversión y creación de documentos, incluyendo PDFs y otros formatos.
+
+> 📁 Ejecutar como superusuario:  
+> ```bash
+> sudo bash setup.sh
+> ```
+
+### 🐳 Ambiente Docker
+
+Para facilitar la implementación y pruebas, el sistema cuenta con un entorno Docker compuesto por tres contenedores:
+
+- `mariadb`: base de datos  
+- `nginx`: servidor web que actúa como proxy inverso  
+- `eieinfo_app`: aplicación Django
+
+Este entorno permite simular el despliegue en el servidor **Faraday**, y está preparado para integrarse con sistemas de CI/CD como **Drone**, automatizando la ejecución de pruebas y despliegue de código.
+
+> 🔧 Comandos clave:  
+> ```bash
+> docker compose build
+> docker compose up
+> docker compose down
+> ```
+
+> 🌐 Acceso a la aplicación:  
+> [http://localhost:8080](http://localhost:8080)
+
+### 🔄 Integración Continua y Pruebas Locales (Drone CI)
+
+El sistema **EIEInfo** utiliza un pipeline de integración continua local mediante **[Drone CI](https://www.drone.io/)**. Este proceso automatiza:
+
+- 🔍 Validación del estado de los contenedores Docker  
+- 🌐 Verificación de accesibilidad de rutas web (públicas y privadas)  
+- ⚙️ Ejecución de migraciones de base de datos  
+- 📦 Generación de fixtures  
+- ✅ Pruebas unitarias sobre módulos seleccionados
+
+📄 Archivo del pipeline: [`drone.yml`](https://git.ucr.ac.cr/eieinfo/EIEInfo/-/blob/master/docker/drone-local/drone.yml)
+
+### 🛠️ Etapas del pipeline
+
+1. **Inicialización del pipeline**
+   - Muestra mensaje de inicio y pausa breve
+
+2. **Test de conectividad entre contenedores**
+   - Usa `ping` para validar que `db`, `nginx` y `eieinfo_app` están corriendo
+
+3. **Verificación de servicios activos**
+   - Usa `netcat` para asegurar puertos abiertos en los servicios web y base de datos
+
+4. **Configuración del entorno Django**
+   - Ejecuta scripts `.env` y `migraciones.sh` para preparar el entorno
+
+5. **Pruebas de URLs institucionales**
+   - Usa `curl` para verificar acceso a rutas públicas y privadas:
+     - `/estudiantes`, `/profesores/login`, `/admin`, etc.
+     - Incluye pruebas con autenticación básica para usuarios del sistema
+
+6. **Generación de fixtures y pruebas unitarias**
+   - Exporta datos en formato JSON para pruebas
+   - (Opcional) ejecuta pruebas Django, algunas comentadas por dependencias pendientes
+
+> ⚠️ Algunas rutas pueden fallar si recursos estáticos o dependencias no están presentes. Estas están documentadas con comentarios en el archivo `drone.yml`.
+
+
+#### 🧪 Ejecución local del pipeline
+
+1. Asegurate de que los contenedores Docker estén en ejecución y en red (por ejemplo, `eieinfo_default`)
+2. Ejecutá el siguiente comando desde el directorio raíz:
+
+```bash
+drone exec --network eieinfo_default docker/drone-local/drone.yml
+```
+
+--- 
+### 🔌 Integración con APIs Externas
+
+El sistema **EIEInfo** se integra con varias APIs para extender su funcionalidad, automatizar procesos institucionales y conectar servicios externos.
+
+#### 📅 Google Calendar API
+
+Se utiliza para crear y gestionar eventos automáticamente en los calendarios institucionales de la Escuela.
+
+- **Scope requerido:** [`https://www.googleapis.com/auth/calendar`](https://www.googleapis.com/auth/calendar)
+- **Archivo de credenciales:** `eieinfo_credentials.json`
+- **Librería:** `google-api-python-client`
+- **Aplicación registrada:** *Google Calendar API Python Quickstart*
+- **Uso principal:** Automatización de calendarios de actividades y eventos académicos
+
+#### 🔍 Google Custom Search API
+
+Permite realizar búsquedas dentro del sitio institucional y fuentes específicas autorizadas.
+
+- **URL base:**
+[Google APIS](https://www.googleapis.com/customsearch/v1?key={API_KEY}&cx={SEARCH_ENGINE_ID}&q={QUERY})
+- **Parámetros:**
+- `API_KEY`: clave de acceso
+- `cx`: ID del motor de búsqueda personalizado
+- `q`: término o frase de búsqueda
+
+#### 📲 Facebook Graph API
+
+Utilizada para automatizar publicaciones en la página oficial de la Escuela de Ingeniería Eléctrica.
+
+- **Funciones disponibles:**
+- `PostearEnFacebook(message, attachment)`
+- `PostearImagenEnFacebook(image, message)`
+- **Librería:** `facebook-sdk`
+- **Token de acceso:** definido en `settings.py` como `FACEBOOK_ACCESS_TOKEN`
+- **Ejemplo de uso:**
+```python
+attachment = {
+    'name': 'Estudiar en Ingeniería Eléctrica',
+    'link': 'https://eie.ucr.ac.cr/anuncios/15/',
+    'caption': 'Anuncios EIE',
+    'description': 'La carrera de Ingeniería Eléctrica ofrece...',
+    'picture': 'https://eie.ucr.ac.cr/media/anuncios/Redes.jpg'
+}
+```
