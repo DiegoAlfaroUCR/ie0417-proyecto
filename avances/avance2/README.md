@@ -4,6 +4,111 @@
 ## Calidad de código y CI
 ## Estilo y documentación
 
+
+### Reglas de formato
+En la descripción del repositorio se establecen las siguientes reglas de formato para los scripts escritos en Python:
+* Se siguen las reglas de formato definidas en [PEP8](https://peps.python.org/pep-0008/).
+* Nombres de `clases`, `modelos`, `métodos de modelos` y `funciones independientes` se escriben en [CamelCase](https://en.wikipedia.org/wiki/Camel_case).
+* Nombres de `atributos de clases`, `variables locales` y `decoradores` se escriben en [snake_case](https://en.wikipedia.org/wiki/Snake_case).
+* La documentación de funciones y clases se debe realizar con [docstrings](https://peps.python.org/pep-0257/).
+
+### [Flake8](https://flake8.pycqa.org/en/latest/)
+Se establece el uso de Flake8 como herramienta para verificar que se cumplan las reglas de formato de PEP8. Se menciona el uso del mismo en linters como [linter-flake8](https://atom.io/packages/linter-flake8). Sin embargo, esta es una herramienta para [Atom](https://atom.io/), el cual ha sido archivado como proyecto y ya no recibe actualizaciones. Esto indica que las prácticas de linting usadas en el proyecto, o la referencia de linter listada,  *están desactualizadas por al menos 2 años*.
+
+Para el uso de Flake8 se tiene el archivo `.flake8` con las configuraciones de archivos a excluir (`__pycache__` `migrations`, `./src/server/eieinfo/settings.py`, `scripts`, etc) y los tipos de errores a ignorar (`D203`, `E731`, `W503`, `W504`, `W605`). Si se ejecuta el módulo de flake8 desde el root del proyecto, se obtienen hasta 1256 líneas de errores encontrados, indicando una cantidad considerable de violaciones de formato. Por ejemplo, en el archivo `src/server/asistencias/test.py`, se encuentran 203 errores de linting para PEP8. En este mismo archivo se nota que no se siguen las convenciones de documentación con docstrings para las funciones, pero si se encuentran comentarios en español indicando que se trata de documentación hecha por los desarrolladores (no automáticamente por Django). Por ende, **existe una fuerte deficiencia en el seguimiento de los estilos de documentación establecidos.**
+
+Para evaluar la severidad de esta deficiencia se utiliza la opción `-q` con flake8 para encontrar cada archivo con errores de formato, resultando en 83 archivos (listados más adelante). Estos provienen en su gran mayoría del código fuente del módulo `server`. No se considera prudente emplear las herramientas de corrección automática de flake8, puesto que pueden generar errores imprevistos. 
+
+```bash
+$ flake8 -q
+./docker/django/secret_credentials.py
+./docker/django/settings.py
+./src/server/administrativos/models.py
+./src/server/administrativos/nombramientos_auto.py
+./src/server/administrativos/tests.py
+./src/server/administrativos/urls.py
+./src/server/administrativos/templatetags/misc_tags.py
+./src/server/administrativos/urlpatterns/asistencias.py
+./src/server/administrativos/urlpatterns/consejo_asesor.py
+./src/server/administrativos/urlpatterns/estudiantes.py
+./src/server/administrativos/urlpatterns/gestion_inventario.py
+./src/server/administrativos/urlpatterns/home.py
+./src/server/administrativos/urlpatterns/noticias.py
+./src/server/administrativos/urlpatterns/practica_profesional.py
+./src/server/administrativos/urlpatterns/reservaciones.py
+./src/server/administrativos/views/asistencias.py
+./src/server/alumni/forms.py
+./src/server/alumni/tests.py
+./src/server/alumni/urlpatterns/alumni.py
+./src/server/alumni/urlpatterns/empleo.py
+./src/server/alumni/urlpatterns/publico.py
+./src/server/alumni/views/empleo.py
+./src/server/anuncios/models.py
+./src/server/anuncios/urls.py
+./src/server/asistencias/tests.py
+./src/server/atributos/admin.py
+./src/server/atributos/forms.py
+./src/server/atributos/tests.py
+./src/server/atributos/urls.py
+./src/server/atributos/views.py
+./src/server/atributos/templatetags/descriptor_tags.py
+./src/server/conferencias/views.py
+./src/server/cursos/forms.py
+./src/server/cursos/models.py
+./src/server/cursos/tests.py
+./src/server/cursos/urls.py
+./src/server/cursos/views.py
+./src/server/eieinfo/backends.py
+./src/server/eieinfo/FacebookAPI.py
+./src/server/eieinfo/misc.py
+./src/server/estudiantes/forms.py
+./src/server/estudiantes/models.py
+./src/server/estudiantes/tests.py
+./src/server/estudiantes/urls.py
+./src/server/estudiantes/urlpatterns/asistencias.py
+./src/server/estudiantes/urlpatterns/bodega.py
+./src/server/estudiantes/urlpatterns/cursos.py
+./src/server/estudiantes/urlpatterns/home.py
+./src/server/estudiantes/urlpatterns/practica_profesional.py
+./src/server/estudiantes/urlpatterns/proyecto_electrico.py
+./src/server/estudiantes/urlpatterns/publico.py
+./src/server/estudiantes/urlpatterns/tfg.py
+./src/server/estudiantes/urlpatterns/tramites.py
+./src/server/estudiantes/views/asistencias.py
+./src/server/eventos/models.py
+./src/server/inventario/urls.py
+./src/server/laboratorios/urls.py
+./src/server/profesores/cron.py
+./src/server/profesores/forms.py
+./src/server/profesores/misc.py
+./src/server/profesores/tests.py
+./src/server/profesores/urls.py
+./src/server/profesores/urlpatterns/asistencias.py
+./src/server/profesores/urlpatterns/comisiones.py
+./src/server/profesores/urlpatterns/consejo_asesor.py
+./src/server/profesores/urlpatterns/cursos.py
+./src/server/profesores/urlpatterns/home.py
+./src/server/profesores/urlpatterns/laboratorios.py
+./src/server/profesores/urlpatterns/noticias.py
+./src/server/profesores/urlpatterns/practica_profesional.py
+./src/server/profesores/urlpatterns/proyectos.py
+./src/server/profesores/urlpatterns/proyecto_electrico.py
+./src/server/profesores/urlpatterns/publicaciones.py
+./src/server/profesores/urlpatterns/publico.py
+./src/server/profesores/urlpatterns/tfg.py
+./src/server/profesores/views/comisiones.py
+./src/server/profesores/views/consejo_asesor.py
+./src/server/profesores/views/trabajos_finales.py
+./src/server/proyecto_electrico/tests.py
+./src/server/trabajos_finales/forms.py
+./src/server/trabajos_finales/urls.py
+./src/server/webpage/tests.py
+./src/server/webpage/urls.py
+
+```
+
+En el repo se emplea un hook (localizado en `.git/hooks` al obtener el repo de forma local) el cual debe asegurar que los commits hechos en el repo sigan las reglas de formato especificadas. Al instalar el repo de forma local se nota que estos archivos de hook se encuentran nombrados como `samples`, y se deben renombrar para que tomen efecto. Sin embargo, aún luego de hacer esto se encontró que los archivos no se encuentran configurados para realizar revisiones del estilo de código con Flake8. Esto podría indicar que en el ciclo de desarrollo no se están revisando correctamente estas guías, o que la configuración de los hooks debe realizarse de forma manual, lo cual indicaría un proceso más obtuso de desarrollo. Por ejemplo, `pre-commit.sample` solo contiene pruebas para verificar nombres de archivos no ASCII o con espacios en blanco.
+
 # Análisis de entrevistas
 
 ## Transcripción de entrevista a [Profesor Gustavo Nuñez](https://eie.ucr.ac.cr/profesores/gustavo.nunez/) - Plataforma EIE
