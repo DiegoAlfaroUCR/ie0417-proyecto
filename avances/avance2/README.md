@@ -184,3 +184,94 @@ En el repo se emplea un hook (localizado en `.git/hooks` al obtener el repo de f
 * **¿Qué otros aspectos de mejora considera que hay?**
 
     Actualmente la sección de jefaturas no muestra nada, falta agregar dicha información.
+
+---
+## Transcripción de entrevista a [Profesor Marco Villalta](https://eie.ucr.ac.cr/profesores/m.villalta/) - Plataforma EIE
+
+### 1. Experiencia General y Usabilidad
+
+* **¿Ha participado en alguna forma en el desarrollo de la página o servidor? Si es así, ¿cuál fue su rol?**
+
+Sí. Su rol ha sido principalmente en testing y corrección de errores urgentes en producción (rol de "bombero"). También ha trabajado en la configuración de Docker para pruebas e integración continua.
+
+* **¿Desde cuándo utiliza la plataforma EIE y para qué (usos)?**
+
+Desde que se creó. La utiliza como usuario para administrar noticias y anuncios, y como profesor para solicitar asistencias y consultar información académica.
+
+* **¿Qué funcionalidades considera más útiles?**
+
+- Asignación de profesores a cursos.
+- Gestión de horarios.
+- Subida de archivos para distintos tipos de usuarios.
+
+* **¿Qué tan intuitiva y accesible le parece la plataforma? (Interfaz y función)**
+
+Desde la perspectiva de usuario, la califica con un 8 de 10. Considera que la experiencia es generalmente buena, pero no es claro que se debe iniciar sesión para acceder a ciertas funciones, lo cual afecta la usabilidad.
+
+---
+
+### 2. Feedback de Usuario
+
+* **¿Considera que la plataforma cumple sus necesidades como profesor, administrativo, etc.? ¿Qué aspectos se podrían mejorar?**
+
+Como profesor y administrativo cumple con sus funciones básicas. Sin embargo, como administrador de la plataforma hay áreas poco claras y difíciles de modificar sin causar errores. Algunos registros antiguos no pueden eliminarse debido a dependencias mal gestionadas.
+
+* **Encargado de laboratorio / Director de Departamento**
+
+No aplica directamente en este caso, pero se mencionan limitaciones de visibilidad y administración que podrían afectar a estos perfiles también.
+
+---
+
+### 3. Mantenimiento y Confiabilidad
+
+* **¿Ha experimentado fallas, errores o limitaciones en el uso de la plataforma? ¿Con qué frecuencia?**
+
+Sí. Aproximadamente con una frecuencia de 1 a 2 en una escala de 5, especialmente al intentar modificar o eliminar información.
+
+* **¿Considera que el mantenimiento y soporte técnico son adecuados?**
+
+Es principalmente reactivo. Se revisan logs frecuentemente para detectar fallas que no detienen la plataforma pero que requieren atención.
+
+* **¿Ha encontrado problemas con el rendimiento de la página y dónde?**
+
+No ha realizado mediciones formales de rendimiento. Asigna recursos suficientes, pero no hay métricas claras de desempeño.
+
+* **¿Ha encontrado problemas de seguridad?**
+
+No. Django ofrece una buena base de seguridad. Sin embargo, no se han realizado pruebas activas de penetración o auditorías.
+
+---
+
+### 4. Áreas de Crecimiento
+
+* **¿Qué funcionalidades le gustaría ver implementadas en la plataforma?**
+
+- Integración del módulo de reservas de espacios (actualmente oculto).
+- Ampliación e integración de un nuevo módulo de bodega que un estudiante está desarrollando por aparte.
+
+* **¿Ve oportunidades para integrar otras herramientas o sistemas institucionales?**
+
+Sí. Mencionó como ejemplo:
+  - Conexión con las pantallas informativas de la escuela.
+  - Integración de un bot para enviar anuncios/eventos al canal oficial de la EIE.
+
+---
+
+### 5. Aspectos no cubiertos (desarrollo)
+
+* **¿Qué desafíos técnicos encuentra en la implementación/desarrollo presente?**
+
+- Falta de documentación del código.
+- Ausencia de un estilo de codificación consistente.
+- Base de datos mal estructurada, con relaciones improvisadas y sin una planificación escalable.
+
+* **¿Qué cambios está implementando o considera implementar?**
+
+Está integrando gradualmente pruebas unitarias escritas en 2023. Utiliza el servicio Drone en un servidor local para CI/CD, ya que GitLab institucional tiene restricciones de recursos.
+
+* **¿Qué otros aspectos de mejora considera que hay?**
+
+- Mejorar la cobertura de pruebas.
+- Incorporar documentación formal (Sphinx, Doxygen).
+- Unificar estilos de codificación.
+- Rediseñar la base de datos con principios de escalabilidad y relaciones bien definidas.
