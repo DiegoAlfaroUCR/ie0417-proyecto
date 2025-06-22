@@ -470,3 +470,50 @@ Está integrando gradualmente pruebas unitarias escritas en 2023. Utiliza el ser
 - Incorporar documentación formal (Sphinx, Doxygen).
 - Unificar estilos de codificación.
 - Rediseñar la base de datos con principios de escalabilidad y relaciones bien definidas.
+## Revición cruzada de los análisis
+### 1. Experiencia General y Usabilidad
+
+| Aspecto                        | Análisis 1 (Usuario Administrativo)                                           | Análisis 2 (Desarrollador/Profesor)                                           | Observaciones Cruzadas |
+|-------------------------------|--------------------------------------------------------------------------------|--------------------------------------------------------------------------------|-------------------------|
+| **Rol en la plataforma**      | Coordinador de funciones y bugs, sin participación técnica                     | Testing, corrección de errores en producción, CI con Docker                   | Perspectivas complementarias: usuario administrativo vs. técnico-operativo. |
+| **Tiempo de uso**             | Desde 2022                                                                    | Desde la creación de la plataforma                                            | Ambos tienen experiencia significativa y prolongada. |
+| **Funciones más útiles**      | Concursos de asistencia, info de docentes                                     | Asignación de cursos, horarios, subida de archivos                            | Los dos valoran la funcionalidad relacionada con **cursos y gestión académica**. |
+| **Usabilidad e interfaz**     | Intuitiva pero con margen de mejora                                           | 8/10. Problema: acceso a funciones sin login claro                            | Coinciden en que **la experiencia es positiva**, pero mejorable, especialmente en **claridad de navegación**. |
+
+### 2. Feedback de Usuario
+
+| Aspecto                                 | Análisis 1                                                                       | Análisis 2                                                                                         | Observaciones Cruzadas |
+|----------------------------------------|----------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------|-------------------------|
+| **Como profesor**                      | No se pueden ver concursos anteriores                                           | Cumple funciones básicas, pero interfaz administrativa poco clara                                | Ambos notan **limitaciones para funciones avanzadas** y navegación de datos históricos. |
+| **Como encargado de laboratorio**      | No hay visibilidad dinámica de equipos                                          | No aplica directamente                                                                             | El primer análisis señala una **necesidad no cubierta**, relevante para roles logísticos. |
+| **Como director de departamento**      | Choques de horario/aula, falta de visualización semanal                        | No aplica directamente                                                                             | Se identifican **falencias de planificación visual** útiles para gestión académica. |
+| **Limitaciones administrativas**       | N/A                                                                             | Registros antiguos no pueden eliminarse; dependencias mal gestionadas                             | Se evidencian **problemas estructurales** en la administración de datos. |
+
+### 3. Mantenimiento y Confiabilidad
+
+| Aspecto                                | Análisis 1                                                                      | Análisis 2                                                                                          | Observaciones Cruzadas |
+|---------------------------------------|----------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|-------------------------|
+| **Errores frecuentes**                | Error 500 en formularios y APIs externas                                        | Fallas al modificar/eliminar info, nivel de error medio                                             | Coinciden en que **los errores existen**, y algunos son recurrentes. |
+| **Soporte técnico**                   | Adecuado, pero podría mejorar con más personal                                  | Reactivo, se revisan logs pero sin métricas formales                                                | Ambos reconocen que **el soporte es limitado**, principalmente reactivo. |
+| **Rendimiento**                       | No hay quejas importantes                                                       | Sin métricas, pero asignación adecuada de recursos                                                  | Ausencia de **monitoreo formal** de rendimiento. |
+| **Seguridad**                         | No ha identificado problemas. No hay 2FA                                        | No ha identificado problemas. Falta auditoría o pruebas de penetración                             | Coinciden en **ausencia de problemas críticos**, pero también en **falta de pruebas formales**. |
+
+### 4. Áreas de Crecimiento
+
+| Aspecto                              | Análisis 1                                                                             | Análisis 2                                                                                          | Observaciones Cruzadas |
+|-------------------------------------|----------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|-------------------------|
+| **Nuevas funcionalidades**         | Trámites de comisiones en línea; visualización de jefaturas                           | Integrar módulo de reservas; módulo de bodega en desarrollo                                          | Ambos sugieren **extender funcionalidades existentes** y crear nuevas herramientas de gestión. |
+| **Integraciones institucionales**  | Pantallas informativas en edificio                                                    | Pantallas, bot para Telegram/Discord                                                                 | Coinciden en la **oportunidad de recuperar y ampliar canales de comunicación institucional**. |
+| **Otras mejoras**                  | Visualización de horarios por ciclo; evitar choques de aulas                          | Documentación del código, rediseño de BD, CI/CD                                                      | Los usuarios apuntan tanto a mejoras de **usabilidad** como de **estructura técnica interna**. |
+
+### Coincidencias clave
+
+- La plataforma es funcional, pero limitada en aspectos de gestión y visualización.
+- El soporte técnico es adecuado, aunque reactivo y con pocos procesos automatizados.
+- La interfaz es generalmente intuitiva, pero con obstáculos como la falta de claridad al requerir inicio de sesión para ciertas funciones.
+- Existe un interés compartido en integrar herramientas institucionales (pantallas informativas, bots, reservas, etc.) y en expandir funcionalidades útiles para perfiles administrativos.
+
+### Divergencias relevantes
+
+- Los problemas estructurales del sistema (como dependencias internas mal gestionadas, falta de documentación, y pobre modelado de base de datos) solo son evidentes desde el lado técnico.
+- Las necesidades de roles como encargados de laboratorio o directores de departamento no están suficientemente visibilizadas en el desarrollo actual.
