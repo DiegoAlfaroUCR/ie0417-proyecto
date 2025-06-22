@@ -1,7 +1,37 @@
 # Revisión técnica del código
-
 ## Rendimiento y eficiencia
+Se realizó un análisis usando cProfile en distintos módulos del sistema: `cursos` , `trabajos_finales`, 
+`profesores`, `estudiantes`, `administrativos`, `alumno`, `anuncios`, `eventos`, `conferencias`, `laboratorios`, `proyectos`, `atributos`. Todos estos archivos se encuentran en la ruta: src/server.
+
+En general,  las funciones nativas de manipulación de cadenas y listas, como endswith, startswith, 
+rstrip y append, son las más llamadas en casi todos los módulos evaluados. Por lo que las operaciones sobre 
+estructuras de datos básicas constituyen una parte significativa de la carga computacional.
+
+El tiempo total de ejecución (tottime), las funciones relacionadas con operaciones de entrada/salida, 
+como nt.stat, _io.open_code, marshal.loads y la lectura de archivos mediante BufferedReader, son responsables 
+de los mayores consumos de tiempo. Esto sugiere que el acceso al sistema de archivos y la deserialización de 
+datos representan cuellos de botella recurrentes, especialmente en módulos con alto volumen de procesamiento 
+de archivos o interacción con el sistema operativo.
+
+El análisis por tiempo promedio por llamada (percall_tottime) y tiempo acumulado por llamada (percall_cumtime) 
+muestran el cuidado al usar funciones como builtins.exec y los mecanismos internos de importación de 
+módulos de Python (_find_and_load, _find_and_load_unlocked) cuando se quiere reducir el tiempo promedio. Estas 
+funciones presentan los valores más altos, por lo que la carga dinámica de módulos y la ejecución de código 
+dinámico tienen un gran impacto de rendimiento del trabajo.
+
+En módulos específicos, como trabajos_finales y alumni, se observa una mayor frecuencia de llamadas a métodos 
+de listas y funciones de la biblioteca re (expresiones regulares), lo cual puede estar asociado a procesos de 
+parsing o manipulación intensiva de datos textuales. Asimismo, en los módulos administrativos y anuncios, 
+el acceso al sistema de archivos y la manipulación de cadenas siguen siendo predominantes, aunque con ligeras 
+variaciones en los tiempos registrados.
+
+En resumen, las pruebas mostraron que las operaciones básicas de manipulación de cadenas y listas, junto con 
+las funciones de entrada/salida y carga de módulos, son los principales focos de consumo de recursos en los 
+módulos analizados. 
+
 ## Calidad de código y CI
+
+
 ## Estilo y documentación
 
 
