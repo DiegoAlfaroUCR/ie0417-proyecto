@@ -31,6 +31,171 @@ módulos analizados.
 
 ## Calidad de código y CI
 
+### SonarQube
+[SonarQube](https://www.sonarsource.com/products/sonarqube/) es una herramienta de análisis estático de código fuente que permite identificar **problemas de calidad, vulnerabilidades de seguridad, problemas de mantenibilidad, errores de fiabilidad** y más, en múltiples lenguajes de programación. Es especialmente útil para implementar buenas prácticas de desarrollo y mejorar la calidad del software a lo largo del tiempo.
+
+En este proyecto se configuró un servidor local de SonarQube, y se utilizó el `SonarScanner` para analizar el código fuente de toda la base del sistema EIEInfo. A continuación, se incluye una imagen de los resultados obtenidos tras el escaneo del proyecto:
+
+![imagen_SQ](img/SQ.png)
+
+#### Resultados del análisis
+
+- **Quality Gate**: ✅ **Passed**  
+  _El proyecto pasó la evaluación de calidad mínima, aunque con advertencias._
+
+| Métrica              | Resultado                             | Nivel  |
+|----------------------|----------------------------------------|--------|
+| **Security**          | 5 issues de alto impacto              | E      |
+| **Reliability**       | 2,600 issues                          | D      |
+| **Maintainability**   | 6,400 issues (técnica aceptable)      | A      |
+| **Coverage**          | 0.0% (34k líneas sin cobertura)       | ❌     |
+| **Duplications**      | 30.2% en 272k líneas                  | ❌     |
+| **Security Hotspots** | 375 detectados, menos del 30% revisados | E      |
+
+---
+
+#### Observaciones:
+
+- **Problemas de codificación de archivos**: algunos archivos no usan codificación UTF-8 válida.
+- **Errores de análisis**: se encontraron errores de parseo en al menos 3 archivos Python (ej: `backends.py`).
+- **Sin pruebas detectadas**: no se halló ningún archivo de cobertura de pruebas ni pruebas automatizadas (coverage 0%).
+- Se recomienda revisar los archivos ignorados por `.gitignore` y aquellos detectados como código generado.
+
+---
+
+### ESLint
+
+**ESLint** es una herramienta de análisis estático de código para JavaScript. Ayuda a detectar errores de sintaxis, problemas de estilo y posibles fallos lógicos antes de que el código sea ejecutado. Su integración en el proyecto permite mantener un estándar de calidad, evitar errores comunes y facilitar el mantenimiento colaborativo del sistema.
+
+---
+
+####  ¿Para qué sirve?
+
+- Detectar errores sintácticos y malas prácticas en el código.
+- Establecer convenciones de estilo unificadas para todo el equipo.
+- Facilitar la revisión de código y prevenir bugs desde etapas tempranas.
+- Automatizar la corrección de ciertos errores de estilo o formato.
+
+---
+
+####  Proceso de configuración
+
+Se ejecutó el asistente interactivo de ESLint mediante el comando:
+
+```bash
+npx eslint --init
+```
+### Configuración de ESLint
+
+Las opciones seleccionadas fueron:
+
+- **Lenguaje**: JavaScript  
+- **Modo de uso**: Solo sintaxis (syntax)  
+- **Tipo de módulo**: CommonJS  
+- **Framework**: Ninguno  
+- **Uso de TypeScript**: No  
+- **Entorno de ejecución**: Navegador (browser)
+
+---
+
+####  Librerías agregadas
+
+Durante la configuración se instalaron las siguientes dependencias mediante `npm`:
+
+- `eslint`
+- `globals`
+
+Estas se añadieron automáticamente al archivo `package.json`.
+
+---
+
+#### 🧾 Archivo de configuración `eslint.config.mjs`
+
+```js
+import globals from "globals";
+import { defineConfig } from "eslint/config";
+
+export default defineConfig([
+  { files: ["**/*.js"], languageOptions: { sourceType: "commonjs" } },
+  { files: ["**/*.{js,mjs,cjs}"], languageOptions: { globals: globals.browser } },
+  {
+    ignores: [
+      '**/bower_components/**',
+      '**/node_modules/**',
+      '**/static/libs/**',
+    ],
+  },
+]);
+```
+
+---
+
+Este archivo define:
+
+- Qué archivos analizar (`.js`, `.mjs`, `.cjs`).
+- El entorno del navegador como global.
+- Directorios que deben ignorarse para evitar analizar código de terceros o dependencias externas.
+
+---
+
+###  Resultado del análisis
+
+Se ejecutó el análisis estático con el siguiente comando:
+
+```bash
+npx eslint src/server --ext .js
+```
+Se verificó que los archivos relevantes del sistema fueron analizados correctamente y que las carpetas de librerías externas fueron excluidas exitosamente. El resultado fue positivo, es decir:
+
+ Las pruebas de ESLint sobre los archivos del proyecto salieron limpias, sin errores ni advertencias relevantes.
+
+### Evaluación del CI/CD (Drone)
+
+El repositorio incluye una configuración funcional de CI/CD utilizando [Drone CI](https://www.drone.io/), que permite construir, verificar, desplegar y notificar automáticamente en cada cambio que se integra a la rama `master`.
+
+El archivo `drone.yml` define múltiples etapas:
+
+- ✅ **Compilación y despliegue de contenedores Docker (`docker compose build / up`)**.
+- ✅ **Pruebas de red (`ping`, `netcat`) entre servicios como `nginx`, `db` y `eieinfo_app`**.
+- ✅ **Inicialización de entorno Django (migraciones, static files, configuraciones)**.
+- ✅ **Pruebas funcionales sobre endpoints con `curl`**, incluyendo rutas públicas y privadas para distintos tipos de usuario.
+- ✅ **Notificaciones a Telegram sobre éxito o fallo de la ejecución**.
+- ✅ **Despliegue automatizado en el servidor Faraday, bajo condiciones controladas**.
+
+---
+
+#### Intentos de pruebas automatizadas
+
+Durante la evaluación del sistema se intentó ejecutar pruebas unitarias utilizando `pytest`, pero los intentos resultaron fallidos debido a múltiples limitaciones:
+
+- ❌ **No están integradas en el CI**: actualmente no existe ninguna etapa en el archivo `drone.yml` que intente ejecutar pruebas con `pytest` o herramientas equivalentes.
+- ❌ **Falta de dependencias**: el archivo `requirements.txt` no incluye paquetes esenciales como `pytest`, `pytest-django` o `coverage`.
+- ❌ **Inexistencia de fixtures o datos de prueba**: no se cuenta con scripts o archivos que permitan poblar la base de datos automáticamente para entornos de prueba.
+- ❌ **Documentación ausente**: no hay instrucciones sobre cómo correr pruebas localmente ni desde CI.
+- ❌ **Estructura de pruebas mínima o vacía**: los archivos `tests.py` en algunos módulos existen pero están vacíos o sin contenido ejecutable.
+- ❌ **Cobertura del 0.0%**: reportada tanto por SonarQube como por la falta de integración con `coverage.py`.
+
+---
+
+#### Recomendaciones para mejorar CI/CD
+
+1. ✅ **Agregar pruebas unitarias básicas** en los módulos de backend más críticos (`usuarios`, `estudiantes`, `cursos`, etc.).
+2. 🔁 **Incluir una etapa de pruebas en el CI (`drone.yml`) que use `pytest` y `coverage`**. Por ejemplo:
+
+```yaml
+- name: run-tests
+  image: python:3.10
+  commands:
+    - pip install -r requirements.txt
+    - pip install pytest pytest-django coverage
+    - cd src/server
+    - coverage run --source='.' manage.py test
+    - coverage report -m
+```
+3. **🧪 Agregar fixtures reutilizables (loaddata)** para poblar la base de datos en pruebas automatizadas.
+
+4. **📊 Subir los resultados de cobertura** a SonarQube usando sonar.python.coverage.reportPaths.
+
 
 ## Estilo y documentación
 
