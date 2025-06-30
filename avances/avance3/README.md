@@ -374,10 +374,135 @@ La inversión inicial en pruebas unitarias y su integración al flujo CI es mode
 
 ---
 
-## Propuesta 3
+## Propuesta 3: Registro y trazabilidad de concursos de asistencias anteriores
 ### Descripción
-### Justificación/Evidencia
-### Diagrama o arquitectura sugerida
-### Análisis de costo/impacto esperado
+Actualmente, no existe una forma de ver concursos de asistencias previas, lo que obliga a repetir procesos desde cero. Por ello, se propone crear una sección que permita consultar concursos de asistencias anteriores, clonar concursos pasados como plantilla para uno nuevo y visualizar datos históricos, tales como postulantes y criterios de asignación.
 
+
+El sistema EIEInfo ya cuenta con una infraestructura sólida para el manejo de asistencias. Entre sus modelos principales se encuentran Asistencia, que es un modelo polimórfico base; ConcursarAsistencia, encargado de gestionar los concursos de estudiantes; y Ciclo, que permite la gestión de los ciclos académicos. Los estados de asistencias contemplados en el sistema son: Solicitada, En Concurso, Estudiante Confirmado, Aprobado por el Director, Rechazada y P9 Lista. Por su parte, los concursos pueden encontrarse en los estados de En Concurso, Aceptado o Declinado. Entre las funcionalidades existentes destacan la creación de asistencias por parte de los profesores, la posibilidad de que los estudiantes concursen, la aprobación o rechazo de concursos y la generación de reportes de asistencias por ciclo.
+
+### Justificación/Evidencia
+El sistema actual presenta varias fortalezas importantes. Cuenta con persistencia de datos, ya que mantiene todos los datos históricos de asistencias y concursos en la base de datos. Además, dispone de una gestión de ciclos eficiente gracias a un modelo robusto de Ciclo, que permite filtrar la información por períodos académicos. La estructura modular del sistema asegura una organización clara, diferenciando adecuadamente entre estudiantes, profesores y administrativos. Finalmente, ya existe una funcionalidad de reportes, la cual puede ser extendida para cubrir nuevas necesidades.
+
+```python
+# Los datos ya se mantienen históricamente
+class Asistencia(models.Model):
+    ciclo = models.ForeignKey(Ciclo, null=True, on_delete=models.DO_NOTHING)
+    ultima_modificacion = models.DateField(auto_now=True)
+
+class ConcursarAsistencia(models.Model):
+    fecha_solicitud = models.DateField(auto_now_add=True)
+    # Todos los datos del concurso se preservan
+```
+El archivo views/asistencias.py gestiona la visualización y asignación de concursos activos, pero no expone concursos históricos
+```python
+# En la función asistencias() - líneas 261-284
+asistencias_en_concurso = Asistencia.objects.filter(
+    funcionario=context["profesor"], ciclo=this_ciclo,
+    estado=ESTADOS_ASISTENCIA_REV['En Concurso'])
+
+# En la función asistencia_concursos() - líneas 324-326
+concursos = ConcursarAsistencia.objects.filter(
+    asistencia=this_asistencia,
+    estado=ESTADO_CONCURSO_ASISTENCIA_REV['En Concurso'])
+```
+Solo se muestran asistencias y concursos con estado "En Concurso", mientras que no existen consultas para estados como "Aceptado" o "Declinado". Además, únicamente se consideran las asistencias del ciclo actual (this_ciclo), y no hay parámetros de búsqueda que permitan filtrar por fecha, estado histórico u otros criterios.
+
+El modelo ConcursarAsistencia parece ser el núcleo de la gestión de concursos, pero solo se filtra por estado "En Concurso"
+```python
+class ConcursarAsistencia(models.Model):
+    estudiante = models.ForeignKey(Estudiante, null=False, on_delete=models.DO_NOTHING)
+    asistencia = models.ForeignKey(Asistencia, on_delete=models.DO_NOTHING)
+    fecha_solicitud = models.DateField(auto_now_add=True)
+    estado = models.PositiveSmallIntegerField(choices=ESTADO_CONCURSO_ASISTENCIA, default=0)
+    nivel_cursa = models.CharField(max_length=255, null=True)
+    cursos_matriculados = models.ManyToManyField(PlantillaCurso)
+    ciclo_aprobo_curso = models.ForeignKey(Ciclo, null=True, blank=True, on_delete=models.DO_NOTHING)
+    creditos_ciclo_anterior = models.PositiveSmallIntegerField(null=True)
+    creditos_ciclo_actual = models.PositiveSmallIntegerField(null=True)
+    experiencia = models.TextField(null=True, blank=True)
+    beca_participacion = models.PositiveSmallIntegerField(choices=RESPUESTAS, default=0, null=True)
+    otras_designaciones = models.TextField(null=True, blank=True)
+    justificacion = models.TextField()
+
+```
+El sistema ya almacena los datos del postulante también que ya existen estados de "aceptado" y "denegado". Además de almacenan datos como experiencia, justificación, créditos, etc.
+
+Los datos históricos ya están en la base de datos. Solo falta implementar las consultas y vistas para acceder a ellos
+
+El sistema de vistas y templates está preparado para mostrar listas y detalles, por lo que la extensión para histórico y clonación es factible
+
+src/server/profesores/templates/profesores/asistencias/
+
+├── asistencia.html (6.2KB, 118 lines)
+
+├── asistencia_concursos.html (3.3KB, 61 lines)
+
+├── asistencias_profesor.html (12KB, 200 lines)
+
+├── confirmar_eliminar_asistencia.html (1.0KB, 31 lines)
+
+└── crear_asistencia.html (2.1KB, 53 lines)
+
+
+### Diagrama o arquitectura sugerida
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    VISTA DE CONSULTA                        │
+├─────────────────────────────────────────────────────────────┤
+│  ┌─────────────────┐  ┌─────────────────┐  ┌──────────────┐ │
+│  │ Filtros por     │  │ Lista de        │  │ Detalles de  │ │
+│  │ Ciclo/Profesor/ │  │ Concursos       │  │ Concurso     │ │
+│  │ Tipo            │  │ Anteriores      │  │ Específico   │ │
+│  └─────────────────┘  └─────────────────┘  └──────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    CAPA DE VISTAS                           │
+├─────────────────────────────────────────────────────────────┤
+│  ┌─────────────────┐  ┌─────────────────┐  ┌──────────────┐ │
+│  │ Vista           │  │ Vista           │  │ Vista        │ │
+│  │ Consulta        │  │ Clonación       │  │ Detalle      │ │
+│  │ Histórica       │  │ Concurso        │  │ Histórico    │ │
+│  └─────────────────┘  └─────────────────┘  └──────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    CAPA DE SERVICIOS                        │
+├─────────────────────────────────────────────────────────────┤
+│  ┌─────────────────┐  ┌─────────────────┐  ┌──────────────┐ │
+│  │ Servicio        │  │ Servicio        │  │ Servicio     │ │
+│  │ Consulta        │  │ Clonación       │  │ Reportes     │ │
+│  │ Histórica       │  │ Concurso        │  │ Históricos   │ │
+│  └─────────────────┘  └─────────────────┘  └──────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    CAPA DE MODELOS                          │
+├─────────────────────────────────────────────────────────────┤
+│  ┌─────────────────┐  ┌─────────────────┐  ┌──────────────┐ │
+│  │ Asistencia      │  │ Concursar       │  │ Ciclo        │ │
+│  │ (existente)     │  │ Asistencia      │  │ (existente)  │ │
+│  │                 │  │ (existente)     │  │              │ │
+│  └─────────────────┘  └─────────────────┘  └──────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+```
+
+
+### Análisis de costo/impacto esperado
+Las dificultades técnicas incluyen la clonación de relaciones ManyToMany, ya que la función copy_model_instance existente no maneja correctamente estas relaciones, como el campo cursos_matriculados en el modelo ConcursarAsistencia. Es necesario implementar una clonación profunda que preserve estas relaciones sin crear duplicados o referencias inválidas para evitar pérdida de información o inconsistencias en la base de datos. En cuanto a la consistencia de estados históricos, el sistema actual solo filtra por el estado "En Concurso", pero los concursos históricos pueden tener estados "Aceptado" y "Declinado", por lo que se debe asegurar que las consultas incluyan todos los estados relevantes sin afectar la lógica existente, evitando que concursos históricos no aparezcan o se dupliquen en diferentes vistas. También se presenta un desafío en el rendimiento cuando hay grandes volúmenes de concursos históricos, lo que requiere implementar paginación eficiente y filtros que no sobrecarguen la base de datos para mantener una interfaz rápida y responsiva. Además, la integración con el sistema de permisos es compleja, dado que la lógica actual (como profesor_login_required y verificaciones de funcionario) debe extenderse a las nuevas vistas sin comprometer la seguridad, evitando accesos no autorizados.
+
+Respecto a las dificultades de datos, la migración de datos existentes es un reto porque los concursos con estados "Aceptado" o "Declinado" podrían no tener todos los campos requeridos por las nuevas funcionalidades, por lo que es necesario migrar o limpiar estos datos para asegurar compatibilidad y evitar datos corruptos o incompletos. También existen referencias cruzadas, ya que los concursos históricos pueden referenciar objetos (cursos, ciclos, estudiantes) que han cambiado o sido eliminados, y se debe manejar esto para que el histórico siga siendo válido y comprensible, evitando errores al mostrar datos o al clonar concursos antiguos.
+
+En cuanto a la interfaz, se debe evitar la confusión entre estados, ya que los usuarios podrían confundir concursos activos ("En Concurso") con históricos ("Aceptado"/"Declinado"). Por ello, es importante diseñar una interfaz clara que distinga estos estados sin sobrecargar la experiencia de usuario, para que no intenten modificar concursos históricos o no entiendan sus posibilidades. La complejidad de filtros también es un desafío, ya que agregar opciones por ciclo, estado, fecha, etc., puede complicar la interfaz; se debe mantener la simplicidad mientras se añaden funcionalidades avanzadas para evitar que los usuarios no utilicen las nuevas opciones por considerarlas complicadas.
+
+En mantenimiento, la evolución de requisitos implica que si los procesos de concursos cambian (nuevos criterios, más pasos), el código de histórico y clonación debe ser flexible para adaptarse a futuros cambios y no volverse rígido o difícil de mantener. Las pruebas de regresión son necesarias para asegurar que las nuevas funcionalidades no rompan las existentes, lo que requiere implementar pruebas que cubran ambos casos y evitar bugs en funcionalidades críticas.
+
+Las dificultades organizacionales incluyen la definición de políticas claras sobre qué datos deben clonarse (solo estructura, postulantes, criterios de selección, etc.), para que la implementación satisfaga las necesidades reales de los usuarios. También es fundamental la capacitación de usuarios, ya que necesitarán aprender nuevos flujos y funcionalidades, por lo que se debe crear documentación y capacitación efectiva sin sobrecargar a los usuarios, para evitar baja adopción.
+
+Por último, en el despliegue, las migraciones de base de datos presentan un reto porque los cambios en modelos requieren migraciones complejas que deben ejecutarse de forma segura para no afectar datos existentes ni causar tiempo de inactividad. Además, la compatibilidad con versiones es importante, ya que el sistema podría estar en uso activo durante la implementación de cambios, por lo que se deben desplegar sin interrumpir el uso normal, evitando interrupciones o datos inconsistentes durante el proceso.
 ---
