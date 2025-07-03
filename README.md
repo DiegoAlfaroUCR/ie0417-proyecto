@@ -1333,5 +1333,8 @@ Las dificultades organizacionales incluyen la definición de políticas claras s
 
 Por último, en el despliegue, las migraciones de base de datos presentan un reto porque los cambios en modelos requieren migraciones complejas que deben ejecutarse de forma segura para no afectar datos existentes ni causar tiempo de inactividad. Además, la compatibilidad con versiones es importante, ya que el sistema podría estar en uso activo durante la implementación de cambios, por lo que se deben desplegar sin interrumpir el uso normal, evitando interrupciones o datos inconsistentes durante el proceso.
 
+# F. Conclusiones
 
----
+## Aprendizajes obtenidos
+## Principales desafíos enfrentados en el análisis del sistema
+## Recomendaciones generales para el equipo de desarrollo de EIEInfo
