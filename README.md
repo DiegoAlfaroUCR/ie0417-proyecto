@@ -1339,13 +1339,24 @@ Por último, en el despliegue, las migraciones de base de datos presentan un ret
 Algunos de los puntos de aprendizaje más relevantes obtenidos por medio del proyecto:
 
 - **Comprensión de la estructura de proyectos grandes en Django:** Se obtuvo un entendimiento más profundo de la forma en la que se estructuran proyectos hechos a base de Django, con los distintos módulos, manejo de forms y misc.
+- **Importancia de las prácticas de ingeniería de software a gran escala:** Se evidenció cómo aspectos como la documentación, las pruebas unitarias y la integración continua juegan un papel fundamental para asegurar la mantenibilidad y escalabilidad de un sistema en producción.
+- **Valor del análisis técnico combinado con entrevistas cualitativas:** El cruce entre la revisión técnica del repositorio y las entrevistas a miembros clave del equipo permitió una visión más completa del sistema, incluyendo tanto aspectos técnicos como organizacionales.
 
 ## Principales desafíos enfrentados en el análisis del sistema
 Los principales desafíos que se encontraron durante el proyecto fueron:
 
 - **Comprender el flujo interno del sistema, especialmente módulos poco documentados:** Debido al tamaño del proyecto resultó difícil encontrar el flujo y lógica de algunas funcionalidades (ej. permisos de profesores para acceder interfaz de grupos).
+- **Falta de documentación técnica actualizada:** Gran parte del código carece de comentarios y estructura que facilite su entendimiento, lo cual aumentó la complejidad del análisis.
+- **Dificultad para rastrear errores debido a diseño acumulativo:** El sistema ha crecido progresivamente sin una arquitectura completamente planificada, lo que ha generado dependencias implícitas y comportamientos difíciles de depurar.
 
 ## Recomendaciones generales para el equipo de desarrollo de EIEInfo
 Algunas recomendaciones hechas para el equipo de desarrollo de EIEInfo:
 
-- **Impulsar la colaboración estudiantil bajo reglas claras de diseño y mantenimiento:** La escuela de Ingeniería Eléctrica posee una vasta población de estudiantes capaces de contribuir efectivamente en el repositorio, solo se recomienda establecer regla para la colaboración de los mismos.
+- **Impulsar la colaboración estudiantil bajo reglas claras de diseño y mantenimiento:** La Escuela de Ingeniería Eléctrica posee una vasta población de estudiantes capaces de contribuir efectivamente en el repositorio; se recomienda establecer lineamientos claros para facilitar su incorporación sin comprometer la calidad del sistema.
+- **Incorporar pruebas unitarias como requisito básico para nuevos módulos:** El sistema carece de una cobertura de pruebas adecuada. Es importante establecer un mínimo de pruebas por cada funcionalidad nueva y asegurar su ejecución mediante integración continua.
+- **Adoptar una estrategia gradual de documentación y refactorización:** Aunque una reestructuración total del sistema podría ser inviable a corto plazo, se recomienda comenzar a documentar de forma incremental el comportamiento de los módulos más críticos, e incorporar herramientas como Sphinx o Doxygen en el flujo de trabajo.
+- **Mejorar la visibilidad de errores y monitoreo en producción:** Integrar herramientas de logging estructurado y monitoreo permitiría al equipo detectar más fácilmente errores en tiempo real y analizar patrones de uso o fallos recurrentes.
+- **Planificar un rediseño a mediano plazo del modelo de datos:** Como se identificó en las entrevistas, el diseño actual de la base de datos presenta dificultades para la escalabilidad. Se recomienda evaluar una migración progresiva a un esquema más normalizado y sostenible.
+
+## Reflexión final
+Este proyecto permitió comprender los retos reales de mantener sistemas en producción dentro de entornos universitarios, donde el personal y los recursos pueden variar con el tiempo. Asimismo, demostró la importancia de combinar habilidades técnicas con sensibilidad hacia los usuarios y procesos institucionales. La experiencia ha fortalecido habilidades en análisis de sistemas, comunicación técnica y propuesta de soluciones dentro de contextos reales y complejos.
