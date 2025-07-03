@@ -1336,5 +1336,16 @@ Por último, en el despliegue, las migraciones de base de datos presentan un ret
 # F. Conclusiones
 
 ## Aprendizajes obtenidos
+Algunos de los puntos de aprendizaje más relevantes obtenidos por medio del proyecto:
+
+- **Comprensión de la estructura de proyectos grandes en Django:** Se obtuvo un entendimiento más profundo de la forma en la que se estructuran proyectos hechos a base de Django, con los distintos módulos, manejo de forms y misc.
+
 ## Principales desafíos enfrentados en el análisis del sistema
+Los principales desafíos que se encontraron durante el proyecto fueron:
+
+- **Comprender el flujo interno del sistema, especialmente módulos poco documentados:** Debido al tamaño del proyecto resultó difícil encontrar el flujo y lógica de algunas funcionalidades (ej. permisos de profesores para acceder interfaz de grupos).
+
 ## Recomendaciones generales para el equipo de desarrollo de EIEInfo
+Algunas recomendaciones hechas para el equipo de desarrollo de EIEInfo:
+
+- **Impulsar la colaboración estudiantil bajo reglas claras de diseño y mantenimiento:** La escuela de Ingeniería Eléctrica posee una vasta población de estudiantes capaces de contribuir efectivamente en el repositorio, solo se recomienda establecer regla para la colaboración de los mismos.
